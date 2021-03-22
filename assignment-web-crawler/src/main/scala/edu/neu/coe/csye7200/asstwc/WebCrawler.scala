@@ -24,11 +24,7 @@ object WebCrawler extends App {
   def wget(u: URL): Future[Seq[URL]] = {
     // Hint: write as a for-comprehension, using the method createURL(Option[URL], String) to get the appropriate URL for relative links
     // 16 points.
-    def getURLs(ns: Node): Seq[Try[URL]] = {
-      for(n <- ns.descendant if n.attribute("href") != None )
-      // deal with the specific pdf file
-        yield new URL(new URL("http://www1.coe.neu.edu/~rhillyard/indexSafe.html"), n.attribute("href").get.toString)
-    }
+    def getURLs(ns: Node): Seq[Try[URL]] = for (n <- ns \\ "a"; hr = n \ "@href") yield createURL(Some(u), hr.toString())
     // TO BE IMPLEMENTED
 
     def getLinks(g: String): Try[Seq[URL]] = {
@@ -37,7 +33,7 @@ object WebCrawler extends App {
     }
     // Hint: write as a for-comprehension, using getURLContent (above) and getLinks above. You might also need MonadOps.asFuture
     // 9 points.
-    for(link <- getURLContent(u); strings <- MonadOps.asFuture(getLinks(link))) yield strings// TO BE IMPLEMENTED
+    for(link <- getURLContent(u); str <- MonadOps.asFuture(getLinks(link))) yield str// TO BE IMPLEMENTED
   }
 
   def wget(us: Seq[URL]): Future[Seq[Either[Throwable, Seq[URL]]]] = {
@@ -45,7 +41,7 @@ object WebCrawler extends App {
     // Hint: Use wget(URL) (above). MonadOps.sequence and Future.sequence are also available to you to use.
     // 15 points. Implement the rest of this, based on us2 instead of us.
     // TO BE IMPLEMENTED
-    Future.sequence(MonadOps.sequence(for(u <- us2) yield wget(u)))
+    Future.sequence(for (u <- us2) yield MonadOps.sequence(wget(u)))
   }
 
   def crawler(depth: Int, us: Seq[URL]): Future[Seq[URL]] = {
