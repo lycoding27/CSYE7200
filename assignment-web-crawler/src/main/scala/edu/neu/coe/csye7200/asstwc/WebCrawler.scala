@@ -44,6 +44,8 @@ object WebCrawler extends App {
     Future.sequence(for (u <- us2) yield MonadOps.sequence(wget(u)))
   }
 
+    // We might use multithreading and parallel programming to improve the efficiency of the web crawler.
+
   def crawler(depth: Int, us: Seq[URL]): Future[Seq[URL]] = {
     def inner(urls: Seq[URL], depth: Int, accum: Seq[URL]): Future[Seq[URL]] =
       if (depth > 0)
